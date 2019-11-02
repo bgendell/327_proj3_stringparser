@@ -26,13 +26,14 @@ StringParserClass::~StringParserClass(){
 //SUCCESS
 //ERROR_TAGS_NULL if either pStart or pEnd is null
 int StringParserClass::setTags(const char *pStart, const char *pEnd){
-	if(pStart && pEnd != NULL){
+	if(pStart != NULL && pEnd != NULL){
 		int sTagLen = strlen(pStart) + 1;
 		int eTagLen = strlen(pEnd) + 1;
-		char* pStartTag = new char(sTagLen);
+		pStartTag = new char[sTagLen];
 		strncpy(pStartTag,pStart,sTagLen);
-		char* pEndTag = new char(eTagLen);
-		strncpy(pEndTag,pStart,eTagLen);
+		pEndTag = new char[eTagLen];
+		strncpy(pEndTag,pEnd,eTagLen);
+		areTagsSet = true;
 		return SUCCESS;
 	}
 	return ERROR_TAGS_NULL;
@@ -47,9 +48,24 @@ int StringParserClass::setTags(const char *pStart, const char *pEnd){
 //ERROR_DATA_NULL pDataToSearchThru is null
 int StringParserClass::getDataBetweenTags(char *pDataToSearchThru, std::vector<std::string> &myVector){
 	myVector.clear();
-	if(pDataToSearchThru != NULL){
-
-		return ERROR_TAGS_NULL;
+	if(pEndTag != NULL && pStartTag != NULL){
+		if(pDataToSearchThru != NULL){
+			int dataLen = strlen(pDataToSearchThru);
+			for(int i = 0; i < dataLen; i++){
+				if(strncmp(pDataToSearchThru + i, pStartTag, strlen(pStartTag)) == 0){
+					for(int j = i + strlen(pStartTag); j <= dataLen; j++){
+						if(strncmp(pDataToSearchThru + j, pEndTag, strlen(pEndTag)) == 0){
+							std::string temp;
+							temp.append((pDataToSearchThru + (i + strlen(pStartTag))),pDataToSearchThru + j);
+							myVector.push_back(temp);
+							break;
+						}
+					}
+				}
+			}
+			return SUCCESS;
+		}
+		return ERROR_DATA_NULL;
 	}
-	return ERROR_DATA_NULL;
+	return ERROR_TAGS_NULL;
 }
